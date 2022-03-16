@@ -16,6 +16,7 @@ import {
 import * as XLSX from "xlsx";
 import useAPI from "../../Hooks/useApi.js";
 import { CSVLink, CSVDownload } from "react-csv";
+import Waiter from "../Waiter/Waiter.jsx";
 const Admin = () => {
   const [login, setLogin] = useState({
     usario: "",
@@ -28,6 +29,7 @@ const Admin = () => {
   const [csvData, setcsvData] = useState([]);
   const [data, setData] = useState([]);
   const [dateSelected, setDateSelected] = useState("");
+  const [loading, setIsLoading] = useState(true);
   const loginUser = () => {
     let newData = { ...login };
     if (login.usuario === "mrangel" && login.password === "elbicho") {
@@ -61,6 +63,7 @@ const Admin = () => {
     if (getfechas.dataReady) {
       setDates(getfechas.data[0]);
     }
+    setIsLoading(false);
   }, [getfechas.isLoading]);
 
   const handleFileSelected = (e) => {
@@ -132,11 +135,13 @@ const Admin = () => {
       },
     }));
     getPersonas.setFire(true);
+    setIsLoading(true);
   };
 
   useEffect(() => {
     if (getPersonas.dataReady) {
       createAndDownloadFile(getPersonas.data);
+      setIsLoading(false);
     }
   }, [getPersonas.isLoading]);
 
@@ -162,91 +167,103 @@ const Admin = () => {
     setcsvData(newAsistencia);
   };
   return (
-    <Container>
-      <Grid container spacing={3}>
-        <Grid item xs={10}>
-          <Card>
-            <CardContent>
-              {login.access === false ? (
-                <div>
-                  Ingrese El Usuario
-                  <TextField
-                    id="usuario"
-                    variant="outlined"
-                    value={login.usuario}
-                    onChange={(e) => handleChange(e)}
-                    fullWidth
-                  />
-                  Ingrese el password
-                  <TextField
-                    id="password"
-                    type="password"
-                    variant="outlined"
-                    value={login.password}
-                    onChange={(e) => handleChange(e)}
-                    fullWidth
-                  />
-                  <br></br>
-                  {login.error ? <p color="red">Datos Incorrectos</p> : null}
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    onClick={loginUser}
-                  >
-                    Acceder
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <div>Ingrese la fecha para consultar la lista</div>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={dateSelected}
-                    label="Age"
-                    fullWidth
-                    onChange={(e) => setDateSelected(e.target.value)}
-                  >
-                    {dates.map((row) => (
-                      <MenuItem
-                        key={row.fechaActividad}
-                        value={row.fechaActividad}
+    <>
+      {loading ? (
+        <Waiter show={loading} isTotalOpacity={loading} />
+      ) : (
+        <Container>
+          <Grid container spacing={3}>
+            <Grid item xs={10}>
+              <Card>
+                <CardContent>
+                  {login.access === false ? (
+                    <div>
+                      Ingrese El Usuario
+                      <TextField
+                        id="usuario"
+                        variant="outlined"
+                        value={login.usuario}
+                        onChange={(e) => handleChange(e)}
+                        fullWidth
+                      />
+                      Ingrese el password
+                      <TextField
+                        id="password"
+                        type="password"
+                        variant="outlined"
+                        value={login.password}
+                        onChange={(e) => handleChange(e)}
+                        fullWidth
+                      />
+                      <br></br>
+                      {login.error ? (
+                        <p color="red">Datos Incorrectos</p>
+                      ) : null}
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        onClick={loginUser}
                       >
-                        {row.fechaActividad}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  <div>
-                    Ingrese el archivo que amablemente California su papa en
-                    Fifa Le dio.
-                  </div>
-                  <input
-                    type="file"
-                    accept=".csv,.xlsx,.xls"
-                    onChange={handleFileUpload}
-                  />
-                  <br></br>
-                  <ButtonGroup fullWidth>
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      color="primary"
-                      onClick={downloadAsistencia}
-                    >
-                      Generar Asistencia
-                    </Button>
-                    <Button fullWidth variant="contained" color="secondarary">
-                      <CSVLink data={csvData}>Download me</CSVLink>
-                    </Button>
-                  </ButtonGroup>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    </Container>
+                        Acceder
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <div>Ingrese la fecha para consultar la lista</div>
+                      <Select
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        value={dateSelected}
+                        label="Age"
+                        fullWidth
+                        onChange={(e) => setDateSelected(e.target.value)}
+                      >
+                        {dates.map((row) => (
+                          <MenuItem
+                            key={row.fechaActividad}
+                            value={row.fechaActividad}
+                          >
+                            {row.fechaActividad}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <div>
+                        Ingrese el archivo que amablemente California su papa en
+                        Fifa Le dio.
+                      </div>
+                      <input
+                        type="file"
+                        accept=".csv,.xlsx,.xls"
+                        onChange={handleFileUpload}
+                      />
+                      <br></br>
+                      <ButtonGroup fullWidth>
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          color="primary"
+                          onClick={downloadAsistencia}
+                        >
+                          Generar Asistencia
+                        </Button>
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          color="secondarary"
+                        >
+                          <CSVLink data={csvData}>Download me</CSVLink>
+                        </Button>
+                      </ButtonGroup>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Container>
+      )}
+    </>
   );
 };
 

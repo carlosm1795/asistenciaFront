@@ -14,6 +14,7 @@ import Select from "react-select";
 import useAPI from "../../Hooks/useApi.js";
 import { makeStyles } from "@material-ui/core/styles";
 import DatePicker from "react-datepicker";
+import Waiter from "../Waiter/Waiter";
 import "react-datepicker/dist/react-datepicker.css";
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,13 +29,21 @@ const useStyles = makeStyles((theme) => ({
 
 const Register = () => {
   const insertData = useAPI(
-    { method: "post", url: "https://asistenciarabackend.herokuapp.com/asistencia/newAsistencia" },
+    {
+      method: "post",
+      url: "https://asistenciarabackend.herokuapp.com/asistencia/newAsistencia",
+    },
     false
   );
   const getIds = useAPI(
-    { method: "get", url: "https://asistenciarabackend.herokuapp.com/ids/getIds" },
+    {
+      method: "get",
+      url: "https://asistenciarabackend.herokuapp.com/ids/getIds",
+    },
     true
   );
+  const [loading, setLoading] = useState(false);
+  const [opacity, setTotalOpacity] = useState(false);
   const [ids, setIds] = useState([]);
   const [personas, setPersonas] = useState([]);
   const [datosActividad, setDatosActividad] = useState({
@@ -86,6 +95,8 @@ const Register = () => {
       }
       setIds(newInfo);
     }
+    setLoading(false);
+    setTotalOpacity(false);
   }, [getIds.isLoading]);
   const insertDataIntoDB = () => {
     if (personas.length > 0) {
@@ -109,129 +120,142 @@ const Register = () => {
         },
       }));
       insertData.setFire(true);
+      setLoading(true);
+      setTotalOpacity(true);
     }
   };
   useEffect(() => {
     if (insertData.dataReady) {
       console.log("Registro Completado");
     }
+    setLoading(false);
+    setTotalOpacity(false);
   }, [insertData.isLoading]);
-  const handleChangeSelect =(e) =>{
-  
+  const handleChangeSelect = (e) => {
     let newdata = { ...datosActividad };
     newdata.identificadorPersona = e.value;
     setDatosActividad(newdata);
-  }
+  };
   return (
-    <Container>
-      <Grid container spacing={3}>
-        <Grid item xs={10}>
-          <Card className={classes.root}>
-            <CardContent>
-              <Typography
-                className={classes.title}
-                color="textSecondary"
-                gutterBottom
-              >
-                Ingrese los identificadores de las personas que van a asistir a
-                la actividad
-              </Typography>
-              {/* <TextField
+    <>
+      {loading ? (
+        <Waiter show={loading} isTotalOpacity={opacity} />
+      ) : (
+        <Container>
+          <Grid container spacing={3}>
+            <Grid item xs={10}>
+              <Card className={classes.root}>
+                <CardContent>
+                  <Typography
+                    className={classes.title}
+                    color="textSecondary"
+                    gutterBottom
+                  >
+                    Ingrese los identificadores de las personas que van a
+                    asistir a la actividad
+                  </Typography>
+                  {/* <TextField
                 id="identificadorPersona"
                 label="Identificador de la persona"
                 variant="outlined"
                 value={datosActividad.identificadorPersona}
                 onChange={(e) => handleChange(e)}
               /> */}
-              <Select options={ids} onChange={(e) =>handleChangeSelect(e)}/>
-              <Typography
-                className={classes.title}
-                color="textSecondary"
-                gutterBottom
-              >
-                Fecha de la Actividad
-              </Typography>
-              <TextField
-                id="fechaActividad"
-                type="date"
-                variant="outlined"
-                value={datosActividad.fechaActividad}
-                onChange={(e) => handleChange(e)}
-                fullWidth
-              />
-              <br />
-              <Typography
-                className={classes.title}
-                color="textSecondary"
-                gutterBottom
-              >
-                Si la persona no posee identificador ingrese el nombre en el
-                siguiente campo
-              </Typography>
-              <Typography
-                className={classes.title}
-                color="textSecondary"
-                gutterBottom
-              >
-                Comentarios
-              </Typography>
-              <TextField
-                id="comentarios"
-                variant="outlined"
-                fullWidth
-                value={datosActividad.comentarios}
-                onChange={(e) => handleChange(e)}
-              />
+                  <Select
+                    options={ids}
+                    onChange={(e) => handleChangeSelect(e)}
+                  />
+                  <Typography
+                    className={classes.title}
+                    color="textSecondary"
+                    gutterBottom
+                  >
+                    Fecha de la Actividad
+                  </Typography>
+                  <TextField
+                    id="fechaActividad"
+                    type="date"
+                    variant="outlined"
+                    value={datosActividad.fechaActividad}
+                    onChange={(e) => handleChange(e)}
+                    fullWidth
+                  />
+                  <br />
+                  <Typography
+                    className={classes.title}
+                    color="textSecondary"
+                    gutterBottom
+                  >
+                    Si la persona no posee identificador ingrese el nombre en el
+                    siguiente campo
+                  </Typography>
+                  <Typography
+                    className={classes.title}
+                    color="textSecondary"
+                    gutterBottom
+                  >
+                    Comentarios
+                  </Typography>
+                  <TextField
+                    id="comentarios"
+                    variant="outlined"
+                    fullWidth
+                    value={datosActividad.comentarios}
+                    onChange={(e) => handleChange(e)}
+                  />
 
-              <br />
-              <br />
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                onClick={AddPerson}
-              >
-                Agregar persona
-              </Button>
-              <Typography variant="body2" component="p">
-                Personas Agregadas a la actividad.
-                {personas.length > 0 ? `Total:${personas.length}` : null}
-                <br />
-                {personas.map((row) => (
-                  <div key={row}>
-                    <li key={row}>
-                      {row}
-                      <Button
-                        onClick={(e) => DeletePerson(row)}
-                        variant="contained"
-                        color="secondary"
-                      >
-                        Eliminar
-                      </Button>
-                    </li>
-                  </div>
-                ))}
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                disabled={
-                  personas.length > 0 && datosActividad.fechaActividad !== ""
-                    ? false
-                    : true
-                }
-                onClick={insertDataIntoDB}
-              >
-                Terminar Registro
-              </Button>
-            </CardActions>
-          </Card>
-        </Grid>
-      </Grid>
-    </Container>
+                  <br />
+                  <br />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    onClick={AddPerson}
+                  >
+                    Agregar persona
+                  </Button>
+                  <Typography variant="body2" component="p">
+                    Personas Agregadas a la actividad.
+                    {personas.length > 0 ? `Total:${personas.length}` : null}
+                    <br />
+                    {personas.map((row) => (
+                      <div key={row}>
+                        <li key={row}>
+                          {row}
+                          <Button
+                            onClick={(e) => DeletePerson(row)}
+                            variant="contained"
+                            color="secondary"
+                          >
+                            Eliminar
+                          </Button>
+                        </li>
+                      </div>
+                    ))}
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    disabled={
+                      personas.length > 0 &&
+                      datosActividad.fechaActividad !== ""
+                        ? false
+                        : true
+                    }
+                    onClick={insertDataIntoDB}
+                  >
+                    Terminar Registro
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          </Grid>
+        </Container>
+      )}
+    </>
   );
 };
 
