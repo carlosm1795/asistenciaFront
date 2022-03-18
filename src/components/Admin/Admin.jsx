@@ -16,6 +16,7 @@ import {
 import * as XLSX from "xlsx";
 import useAPI from "../../Hooks/useApi.js";
 import { CSVLink, CSVDownload } from "react-csv";
+import {NotificationManager} from 'react-notifications';
 import Waiter from "../Waiter/Waiter.jsx";
 const Admin = () => {
   const [login, setLogin] = useState({
@@ -56,6 +57,13 @@ const Admin = () => {
     {
       method: "POST",
       url: "https://asistenciarabackend.herokuapp.com/asistencia/getAsistenciaByDate",
+    },
+    false
+  );
+  const addNewDate = useAPI(
+    {
+      method: "POST",
+      url: "https://asistenciarabackend.herokuapp.com/actividades/newActividad",
     },
     false
   );
@@ -166,6 +174,41 @@ const Admin = () => {
     console.log(newAsistencia);
     setcsvData(newAsistencia);
   };
+  const [datosActividad, setDatosActividad] = useState({
+    fechaActividad: "",
+    maxDateToRegister: "",
+  });
+  const handleChangeDate = (e) => {
+    let newdata = { ...datosActividad };
+    newdata[e.target.id] = e.target.value;
+    setDatosActividad(newdata);
+  };
+
+  const insertNewDate = () => {
+    addNewDate.setParameters((state)=> ({
+      ...state,
+      data:{
+        "fechaActividad": datosActividad.fechaActividad,
+        "maxDateToRegister": datosActividad.maxDateToRegister
+      }
+    }));
+    addNewDate.setFire(true)
+    setIsLoading(true)
+  }
+  useEffect(()=> {
+    if(addNewDate.dataReady){
+      
+      NotificationManager.success('New Date Inserted', 'Excellent');
+      setDatosActividad({
+        fechaActividad: "",
+        maxDateToRegister: "",
+      })
+    }
+    if(insertNewDate.error){
+      NotificationManager.error('Sorry we had an error', 'Dear Friend');
+    }
+    setIsLoading(false)
+  },[addNewDate.isLoading])
   return (
     <>
       {loading ? (
@@ -260,6 +303,45 @@ const Admin = () => {
                 </CardContent>
               </Card>
             </Grid>
+            {login.access === true ? (
+            <Grid item xs={10}>
+              <Card>
+                <CardContent>
+                  <h1>Register New Date:</h1>
+                  <TextField
+                    id="fechaActividad"
+                    type="date"
+                    variant="outlined"
+                    value={datosActividad.fechaActividad}
+                    onChange={(e) => handleChangeDate(e)}
+                    fullWidth
+                  />
+                  <h2>Latest time to register people:</h2>
+                  <TextField
+                    id="maxDateToRegister"
+                    type="datetime-local"
+                    variant="outlined"
+                    value={datosActividad.maxDateToRegister}
+                    onChange={(e) => handleChangeDate(e)}
+                    fullWidth
+                  />
+                  <br></br>
+                  <br></br>
+                  
+                  <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        onClick={insertNewDate}
+                      >
+                        Register New Date
+                      </Button>
+                </CardContent>
+              </Card>
+              </Grid>
+              ):null
+            }
+            
           </Grid>
         </Container>
       )}

@@ -3,10 +3,13 @@ import "./App.css";
 import Register from "./components/Register/Register";
 import Admin from "./components/Admin/Admin";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import 'react-notifications/lib/notifications.css';
 
 function App() {
   return (
     <div className="App">
+      <NotificationContainer/>
       <Router>
   
         <Routes>

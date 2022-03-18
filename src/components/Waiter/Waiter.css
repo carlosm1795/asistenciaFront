@@ -2,7 +2,7 @@
   margin: 0;
   padding: 0;
 }
-#loader-container {
+.loader-container {
   position: fixed;
   font-size: 20px;
   color: #fff;
@@ -23,6 +23,19 @@
 .totalOpacity {
   background-color: rgba(255, 255, 255, 1) !important;
   color: black !important;
+  position: fixed;
+  font-size: 20px;
+  color: #fff;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.35);
+  z-index: 9999;
 }
 .hide-loader {
   display: none !important;
