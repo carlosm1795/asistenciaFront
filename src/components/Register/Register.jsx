@@ -11,6 +11,7 @@ import {
   Container,
 } from "@material-ui/core";
 import Select from "react-select";
+import dayjs from "dayjs";
 import useAPI from "../../Hooks/useApi.js";
 import { makeStyles } from "@material-ui/core/styles";
 import DatePicker from "react-datepicker";
@@ -35,6 +36,13 @@ const Register = () => {
     },
     false
   );
+  const getDates = useAPI(
+    {
+      method: "GET",
+      url: "https://asistenciarabackend.herokuapp.com/actividades/getActividades",
+    },
+    true
+  );
   const getIds = useAPI(
     {
       method: "get",
@@ -46,17 +54,58 @@ const Register = () => {
   const [opacity, setTotalOpacity] = useState(false);
   const [ids, setIds] = useState([]);
   const [personas, setPersonas] = useState([]);
+  const [dates, setDates] = useState([]);
   const [datosActividad, setDatosActividad] = useState({
     identificadorPersona: "",
-    fechaActividad: `${new Date()}`,
+    fechaActividad: '',
     comentarios: "",
   });
   const classes = useStyles();
   const handleChange = (e) => {
     let newdata = { ...datosActividad };
-    newdata[e.target.id] = e.target.value;
+    newdata.fechaActividad = e.value;
     setDatosActividad(newdata);
   };
+
+  useEffect(() => {
+    setLoading(true);
+  }, []);
+
+  useEffect(() => {
+    if (getDates.dataReady && getIds.dataReady) {
+      setLoading(false);
+    }
+  }, [getDates.isLoading, getIds.isLoading]);
+  const addDays = (date, days) => {
+    date.setDate(date.getDate() + days);
+    return date;
+  };
+  //Function that is going to get an array of dates and its going to return the dates for the current month
+  const returnValidDate = (arrayOfDates) => {
+    let currentDate = dayjs();
+    let validDates = [];
+
+    for (let date of arrayOfDates) {
+      let maxDate = dayjs(date.maxDateToRegister);
+      let fechaActividad = dayjs(date.fechaActividad);
+
+      if (
+        fechaActividad.month() === currentDate.month() &&
+        currentDate < maxDate
+      ) {
+        validDates = [
+          ...validDates,
+          { ...date, value: date.fechaActividad, label: date.fechaActividad },
+        ];
+      }
+    }
+    return validDates;
+  };
+  useEffect(() => {
+    if (getDates.dataReady) {
+      setDates(returnValidDate(getDates.data));
+    }
+  }, [getDates.isLoading]);
   const AddPerson = () => {
     if (datosActividad.identificadorPersona !== "") {
       let aux = personas.filter(
@@ -136,10 +185,11 @@ const Register = () => {
     newdata.identificadorPersona = e.value;
     setDatosActividad(newdata);
   };
+
   return (
     <>
       {loading ? (
-        <Waiter show={loading} isTotalOpacity={opacity} />
+        <Waiter show={loading} isTotalOpacity={loading} />
       ) : (
         <Container>
           <Grid container spacing={3}>
@@ -172,13 +222,18 @@ const Register = () => {
                   >
                     Fecha de la Actividad
                   </Typography>
-                  <TextField
+                  {/* <TextField
                     id="fechaActividad"
                     type="date"
                     variant="outlined"
                     value={datosActividad.fechaActividad}
                     onChange={(e) => handleChange(e)}
                     fullWidth
+                  /> */}
+                  <Select
+                    id="fechaActividad"
+                    options={dates}
+                    onChange={(e) => handleChange(e)}
                   />
                   <br />
                   <Typography
