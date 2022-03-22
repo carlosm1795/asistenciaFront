@@ -193,7 +193,7 @@ const Register = () => {
       ) : (
         <Container>
           <Grid container spacing={3}>
-            <Grid item xs={10}>
+            <Grid item xs={12}>
               <Card className={classes.root}>
                 <CardContent>
                   <Typography

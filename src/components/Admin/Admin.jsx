@@ -216,7 +216,7 @@ const Admin = () => {
       ) : (
         <Container>
           <Grid container spacing={3}>
-            <Grid item xs={10}>
+            <Grid item xs={12}>
               <Card>
                 <CardContent>
                   {login.access === false ? (
@@ -304,7 +304,7 @@ const Admin = () => {
               </Card>
             </Grid>
             {login.access === true ? (
-            <Grid item xs={10}>
+            <Grid item xs={12}>
               <Card>
                 <CardContent>
                   <h1>Register New Date:</h1>
