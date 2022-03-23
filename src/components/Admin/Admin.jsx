@@ -13,10 +13,15 @@ import {
   MenuItem,
   ButtonGroup,
 } from "@material-ui/core";
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import * as XLSX from "xlsx";
 import useAPI from "../../Hooks/useApi.js";
 import { CSVLink, CSVDownload } from "react-csv";
-import {NotificationManager} from 'react-notifications';
+import { NotificationManager } from "react-notifications";
+import CustomTable from '../CustomTable/CustomTable';
 import Waiter from "../Waiter/Waiter.jsx";
 const Admin = () => {
   const [login, setLogin] = useState({
@@ -31,6 +36,7 @@ const Admin = () => {
   const [data, setData] = useState([]);
   const [dateSelected, setDateSelected] = useState("");
   const [loading, setIsLoading] = useState(true);
+  const [asistencia, setAsistencia] = useState([]);
   const loginUser = () => {
     let newData = { ...login };
     if (login.usuario === "mrangel" && login.password === "elbicho") {
@@ -50,6 +56,13 @@ const Admin = () => {
     {
       method: "get",
       url: "https://asistenciarabackend.herokuapp.com/asistencia/getDistinctAsistencia",
+    },
+    true
+  );
+  const getFullActivities = useAPI(
+    {
+      method: "get",
+      url: "https://asistenciarabackend.herokuapp.com/asistencia/asistencia",
     },
     true
   );
@@ -73,6 +86,12 @@ const Admin = () => {
     }
     setIsLoading(false);
   }, [getfechas.isLoading]);
+
+  useEffect(() => {
+    if (getFullActivities.dataReady) {
+      setAsistencia(getFullActivities.data);
+    }
+  }, [getFullActivities.isLoading]);
 
   const handleFileSelected = (e) => {
     const files = Array.from(e.target.files);
@@ -185,30 +204,29 @@ const Admin = () => {
   };
 
   const insertNewDate = () => {
-    addNewDate.setParameters((state)=> ({
+    addNewDate.setParameters((state) => ({
       ...state,
-      data:{
-        "fechaActividad": datosActividad.fechaActividad,
-        "maxDateToRegister": datosActividad.maxDateToRegister
-      }
+      data: {
+        fechaActividad: datosActividad.fechaActividad,
+        maxDateToRegister: datosActividad.maxDateToRegister,
+      },
     }));
-    addNewDate.setFire(true)
-    setIsLoading(true)
-  }
-  useEffect(()=> {
-    if(addNewDate.dataReady){
-      
-      NotificationManager.success('New Date Inserted', 'Excellent');
+    addNewDate.setFire(true);
+    setIsLoading(true);
+  };
+  useEffect(() => {
+    if (addNewDate.dataReady) {
+      NotificationManager.success("New Date Inserted", "Excellent");
       setDatosActividad({
         fechaActividad: "",
         maxDateToRegister: "",
-      })
+      });
     }
-    if(insertNewDate.error){
-      NotificationManager.error('Sorry we had an error', 'Dear Friend');
+    if (insertNewDate.error) {
+      NotificationManager.error("Sorry we had an error", "Dear Friend");
     }
-    setIsLoading(false)
-  },[addNewDate.isLoading])
+    setIsLoading(false);
+  }, [addNewDate.isLoading]);
   return (
     <>
       {loading ? (
@@ -304,31 +322,32 @@ const Admin = () => {
               </Card>
             </Grid>
             {login.access === true ? (
-            <Grid item xs={12}>
-              <Card>
-                <CardContent>
-                  <h1>Register New Date:</h1>
-                  <TextField
-                    id="fechaActividad"
-                    type="date"
-                    variant="outlined"
-                    value={datosActividad.fechaActividad}
-                    onChange={(e) => handleChangeDate(e)}
-                    fullWidth
-                  />
-                  <h2>Latest time to register people:</h2>
-                  <TextField
-                    id="maxDateToRegister"
-                    type="datetime-local"
-                    variant="outlined"
-                    value={datosActividad.maxDateToRegister}
-                    onChange={(e) => handleChangeDate(e)}
-                    fullWidth
-                  />
-                  <br></br>
-                  <br></br>
-                  
-                  <Button
+              <>
+                <Grid item xs={12}>
+                  <Card>
+                    <CardContent>
+                      <h1>Register New Date:</h1>
+                      <TextField
+                        id="fechaActividad"
+                        type="date"
+                        variant="outlined"
+                        value={datosActividad.fechaActividad}
+                        onChange={(e) => handleChangeDate(e)}
+                        fullWidth
+                      />
+                      <h2>Latest time to register people:</h2>
+                      <TextField
+                        id="maxDateToRegister"
+                        type="datetime-local"
+                        variant="outlined"
+                        value={datosActividad.maxDateToRegister}
+                        onChange={(e) => handleChangeDate(e)}
+                        fullWidth
+                      />
+                      <br></br>
+                      <br></br>
+
+                      <Button
                         fullWidth
                         variant="contained"
                         color="primary"
@@ -336,12 +355,25 @@ const Admin = () => {
                       >
                         Register New Date
                       </Button>
-                </CardContent>
-              </Card>
-              </Grid>
-              ):null
-            }
-            
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid item xs={12}>
+                  <Card>
+                    <CardContent>
+                      {
+                        asistencia.length > 0 ? 
+                        <CustomTable
+                          title='Resumen de personas anotadas'
+                          header={['Fecha Actividad','Burbuja','Identificador','Fecha Ingreso','Comentarios']}
+                          rows={asistencia.map((row) => [row.fechaActividad,row.numeroBurbuja,row.idPersona,row.fechaIngreso,row.comentarios])}
+                        /> : null
+                      }
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </>
+            ) : null}
           </Grid>
         </Container>
       )}
