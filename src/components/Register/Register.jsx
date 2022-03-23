@@ -14,7 +14,7 @@ import Select from "react-select";
 import dayjs from "dayjs";
 import useAPI from "../../Hooks/useApi.js";
 import { makeStyles } from "@material-ui/core/styles";
-import DatePicker from "react-datepicker";
+import {NotificationManager} from 'react-notifications';
 import Waiter from "../Waiter/Waiter";
 import "react-datepicker/dist/react-datepicker.css";
 const useStyles = makeStyles((theme) => ({
@@ -176,9 +176,14 @@ const Register = () => {
   useEffect(() => {
     if (insertData.dataReady) {
       console.log("Registro Completado");
+      NotificationManager.success('Ingreso registrado satisfactoriamente', 'Excelente');
+    }
+    if(insertData.error){
+      NotificationManager.error('Hubo un error, si persiste el error comunicarse con el asistente mayor', 'Lo sentimos');
     }
     setLoading(false);
     setTotalOpacity(false);
+    setPersonas([]);
   }, [insertData.isLoading]);
   const handleChangeSelect = (e) => {
     let newdata = { ...datosActividad };
