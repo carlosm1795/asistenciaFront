@@ -95,7 +95,7 @@ const Register = () => {
       ) {
         validDates = [
           ...validDates,
-          { ...date, value: date.fechaActividad, label: date.fechaActividad },
+          { ...date, value: date.fechaActividad, label: `${date.fechaActividad} - ${date.lugar}` },
         ];
       }
     }
