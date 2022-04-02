@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -39,14 +39,20 @@ const EditDates = (props) => {
   );
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
-  const [loading,setIsLoading] = useState(false);
-  console.log(props);
+  const [loading, setIsLoading] = useState(false);
 
   const [newDate, setNewDate] = useState({
-    id: props.data.rowData[0],
-    fechaActividad: props.data.rowData[1],
-    maxDateToRegister: props.data.rowData[2],
+    id: "",
+    fechaActividad: "",
+    maxDateToRegister: "",
   });
+  useEffect(() => {
+    setNewDate({
+      id: props.data.rowData[0],
+      fechaActividad: props.data.rowData[1],
+      maxDateToRegister: props.data.rowData[2],
+    });
+  }, [props]);
   const updateDate = () => {
     updateCall.setParameters((state) => ({
       ...state,
@@ -57,7 +63,7 @@ const EditDates = (props) => {
       },
     }));
     updateCall.setFire(true);
-    setIsLoading(true)
+    setIsLoading(true);
   };
   const handleClickOpen = () => {
     setOpen(true);
@@ -73,11 +79,14 @@ const EditDates = (props) => {
     setNewDate(newdata);
   };
   useEffect(() => {
-    if(updateCall.dataReady){
+    if (updateCall.dataReady) {
       NotificationManager.success("Update done", "Excellent");
       handleClose();
+      setIsLoading(false);
+      setNewDate({ id: "", fechaActividad: "", maxDateToRegister: "" });
+      props.setFlagChange(new Date());
     }
-  },[updateCall.isLoading])
+  }, [updateCall.isLoading]);
 
   return (
     <div>
@@ -135,7 +144,7 @@ const EditDates = (props) => {
           <Divider />
           <Button
             autoFocus
-            onClick={handleClose}
+            onClick={updateDate}
             fullWidth
             variant="contained"
             color="primary"
