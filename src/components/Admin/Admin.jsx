@@ -51,7 +51,7 @@ const Admin = () => {
   const [loading, setIsLoading] = useState(true);
   const [asistencia, setAsistencia] = useState([]);
   const [actividadesData, setActividadesData] = useState([]);
-  const [flagNewChange,setFlagChange] = useState('')
+  const [flagNewChange, setFlagChange] = useState("");
   const [value, setValue] = useState(0);
   const handleChangeTab = (event, newValue) => {
     setValue(newValue);
@@ -135,8 +135,8 @@ const Admin = () => {
   }, [actividadesCrud.isLoading]);
 
   useEffect(() => {
-    actividadesCrud.setFire(true)
-  },[flagNewChange])
+    actividadesCrud.setFire(true);
+  }, [flagNewChange]);
 
   const handleFileSelected = (e) => {
     const files = Array.from(e.target.files);
@@ -320,7 +320,7 @@ const Admin = () => {
       label: "Actions",
       options: {
         customBodyRender: (value, tableMeta, updateValue) => {
-          return <EditDates data={tableMeta} setFlagChange={setFlagChange}/>;
+          return <EditDates data={tableMeta} setFlagChange={setFlagChange} />;
         },
       },
     },
@@ -538,7 +538,6 @@ const Admin = () => {
                 </CardContent>
               </Card>
             </Grid>
-           
           </Grid>
         </Container>
       )}
