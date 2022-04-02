@@ -45,12 +45,14 @@ const EditDates = (props) => {
     id: "",
     fechaActividad: "",
     maxDateToRegister: "",
+    lugar:""
   });
   useEffect(() => {
     setNewDate({
       id: props.data.rowData[0],
       fechaActividad: props.data.rowData[1],
       maxDateToRegister: props.data.rowData[2],
+      lugar: props.data.rowData[3],
     });
   }, [props]);
   const updateDate = () => {
@@ -60,6 +62,7 @@ const EditDates = (props) => {
         fechaActividad: newDate.fechaActividad,
         maxDateToRegister: newDate.maxDateToRegister,
         identficadorActividad: newDate.id,
+        lugar:newDate.lugar
       },
     }));
     updateCall.setFire(true);
@@ -137,6 +140,17 @@ const EditDates = (props) => {
               type="datetime-local"
               variant="outlined"
               value={newDate.maxDateToRegister}
+              onChange={(e) => handleChangeDate(e)}
+              fullWidth
+            />
+          </ListItem>
+          <ListItem button>
+            <ListItemText primary="Lugar" fullWidth />
+            <TextField
+              id="lugar"
+              type="text"
+              variant="outlined"
+              value={newDate.lugar}
               onChange={(e) => handleChangeDate(e)}
               fullWidth
             />

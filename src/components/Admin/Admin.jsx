@@ -254,6 +254,7 @@ const Admin = () => {
       data: {
         fechaActividad: datosActividad.fechaActividad,
         maxDateToRegister: datosActividad.maxDateToRegister,
+        lugar:datosActividad.lugar
       },
     }));
     addNewDate.setFire(true);
@@ -265,6 +266,7 @@ const Admin = () => {
       setDatosActividad({
         fechaActividad: "",
         maxDateToRegister: "",
+        lugar:""
       });
     }
     if (insertNewDate.error) {
@@ -314,6 +316,10 @@ const Admin = () => {
     },
     {
       label: "Max Date",
+      filter: true,
+    },
+    {
+      label: "Lugar",
       filter: true,
     },
     {
@@ -472,6 +478,15 @@ const Admin = () => {
                                 onChange={(e) => handleChangeDate(e)}
                                 fullWidth
                               />
+                              <h3>Place:</h3>
+                              <TextField
+                                id="lugar"
+                                type="text"
+                                variant="outlined"
+                                value={datosActividad.lugar}
+                                onChange={(e) => handleChangeDate(e)}
+                                fullWidth
+                              />
                               <br></br>
                               <br></br>
 
@@ -498,6 +513,7 @@ const Admin = () => {
                                     row.identficadorActividad,
                                     row.fechaActividad,
                                     row.maxDateToRegister,
+                                    row.lugar
                                   ])}
                                 />
                               ) : null}
