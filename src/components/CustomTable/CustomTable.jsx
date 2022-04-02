@@ -2,6 +2,7 @@ import React from "react";
 import MUIDataTable from "mui-datatables";
 const CustomTable = (props) => {
   let columns = null;
+  console.log(props)
   if (props.customRows) {
     columns = props.customRows;
   } else {
