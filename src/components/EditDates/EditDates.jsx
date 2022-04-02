@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -13,6 +13,9 @@ import Typography from "@material-ui/core/Typography";
 import CloseIcon from "@material-ui/icons/Close";
 import Slide from "@material-ui/core/Slide";
 import { TextField } from "@material-ui/core";
+import useAPI from "../../Hooks/useApi";
+import Waiter from "../Waiter/Waiter.jsx";
+import { NotificationManager } from "react-notifications";
 const useStyles = makeStyles((theme) => ({
   appBar: {
     position: "relative",
@@ -27,14 +30,35 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 const EditDates = (props) => {
+  const updateCall = useAPI(
+    {
+      method: "POST",
+      url: "https://asistenciarabackend.herokuapp.com/actividades/updateActividades",
+    },
+    false
+  );
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [loading,setIsLoading] = useState(false);
   console.log(props);
 
   const [newDate, setNewDate] = useState({
+    id: props.data.rowData[0],
     fechaActividad: props.data.rowData[1],
     maxDateToRegister: props.data.rowData[2],
   });
+  const updateDate = () => {
+    updateCall.setParameters((state) => ({
+      ...state,
+      data: {
+        fechaActividad: newDate.fechaActividad,
+        maxDateToRegister: newDate.maxDateToRegister,
+        identficadorActividad: newDate.id,
+      },
+    }));
+    updateCall.setFire(true);
+    setIsLoading(true)
+  };
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -48,9 +72,16 @@ const EditDates = (props) => {
     newdata[e.target.id] = e.target.value;
     setNewDate(newdata);
   };
+  useEffect(() => {
+    if(updateCall.dataReady){
+      NotificationManager.success("Update done", "Excellent");
+      handleClose();
+    }
+  },[updateCall.isLoading])
 
   return (
     <div>
+      {loading ? <Waiter show={loading} isTotalOpacity={loading} /> : null}
       <Button variant="contained" color="primary" onClick={handleClickOpen}>
         Edit
       </Button>
